@@ -11,7 +11,7 @@ app.post("/graph/save/:filename", (req, res) => {
 	let filename = req.params.filename;
 	let graph = req.body;
 	
-	fs.writeFile(`${__dirname}/${filename}`, JSON.stringify(graph), (error) => {
+	fs.writeFile(`${__dirname}/saves/${filename}`, JSON.stringify(graph), (error) => {
 		if (error) {
 			console.log(error);
 		}
@@ -21,7 +21,7 @@ app.post("/graph/save/:filename", (req, res) => {
 app.get("/graph/load/:filename", (req, res) => {
 	let filename = req.params.filename;
 	
-	fs.readFile(`${__dirname}/${filename}`, "utf8", (error, data) => {
+	fs.readFile(`${__dirname}/saves/${filename}`, "utf8", (error, data) => {
 		res.setHeader('Content-Type', 'application/json');
 		res.json(data);
 

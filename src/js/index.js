@@ -5,7 +5,7 @@ let selectedNodei = null;
 
 var cy = cytoscape();
 
-function updateGraph(cy) {
+function updateGraph() {
 	cy = cytoscape({
 		container: document.getElementById('cy'),
 
@@ -89,11 +89,11 @@ function updateGraph(cy) {
 	});
 }
 
-function updateNodes(data, filename) {
+function updateNodes(data) {
 	nodes.push({data: data});
 }
 
-function updateEdges(source, target, filename) {
+function updateEdges(source, target) {
 	edges.push({data: {source: source, target: target}});
 }
 
@@ -116,14 +116,29 @@ function loadGraph(filename) {
 			let d = JSON.parse(data);
 			nodes = d["nodes"];
 			edges = d["edges"];
-			updateGraph(cy);
+			updateGraph();
 		}
 	});
 }
 
 $(document).ready(function(){
-	let file = "a.json";
+	let file = `${window.prompt("File Name")}.json`;
 	loadGraph(file);
+
+	if (nodes.length == 0){
+		updateNodes({id: "start"});
+		updateGraph();
+	}
+
+	$(window).bind("keyup keydown", function(evt) {
+		if (evt.ctrlKey && evt.which == 83){
+			evt.preventDefault();
+			saveGraph(file);
+			alert("saved");
+			return;
+		}
+	});
+
 	$("#add-node-attr").click(function () {
 		$("#add-node-container .top-container .inputs-container").append(`
 			<div class="node-attr">
@@ -154,10 +169,9 @@ $(document).ready(function(){
 			let container = document.getElementById("add-node-container");
 			let source = container.dataset.parent
 
-			updateNodes(data, file);
-			updateEdges(source, id, file);
+			updateNodes(data);
+			updateEdges(source, id);
 			updateGraph();
-			saveGraph(file);
 
 			container.dataset.parent = null;
 			container.style.display = "none";
