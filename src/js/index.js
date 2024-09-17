@@ -54,33 +54,34 @@ function updateGraph() {
 		}
 	});
 
-	cy.on("select", "node", function (evt) {
+	//show right click menu
+	cy.on("cxttap", "node", function (evt) {
                 var node = evt.target;
 		
-		if (node.id() != "+"){
-			selectedNode = node.id();
-			
-			var container = document.getElementById("add-node-container")
-			container.style.display = "none";
+		selectedNode = node.id();
+		
+		var container = document.getElementById("add-node-container");
+		container.style.display = "none";
 
-			x = node.position("x");
-			y = node.position("y");
+		var rightClickMenu = document.getElementById("right-click-menu");
 
-			cy.add ([
-				{ group: "nodes", data: {id: "+"}, position: {x: x, y: y+40}}
-			]);
-		}else{
-			var container = document.getElementById("add-node-container");
-			container.style.display = "block";
+		x = evt.renderedPosition.x;
+		y = evt.renderedPosition.y;
 
-			container.dataset.parent = selectedNode;
-		}
+		rightClickMenu.style.display = "block";
+		rightClickMenu.style.top = `${y}px`;
+		rightClickMenu.style.left = `${x}px`;
         })
 
-	cy.on("unselect", "node", function (evt) {
-		cy.remove("node[id='+']");
+	cy.on("mousedown", function (evt) {
+		var container = document.getElementById("add-node-container");
+		container.style.display = "none";
+
+		var rightClickMenu = document.getElementById("right-click-menu");
+		rightClickMenu.style.display = "none";
 	});
 
+	//change color of node and connceted edges on hover/grab
 	cy.on("grab mouseover", "node", function (evt) {
 		var node = evt.target;
 		var activeNode = node.id();
@@ -148,6 +149,16 @@ $(document).ready(function(){
 		}
 	});
 
+	$("#right-click-menu button").click(function() {
+		var container = document.getElementById("add-node-container");
+		container.style.display = "block";
+
+		container.dataset.parent = selectedNode;
+
+		$("#right-click-menu").hide();
+
+	});
+
 	$("#add-node-attr").click(function () {
 		$("#add-node-container .top-container .inputs-container").append(`
 			<div class="node-attr">
@@ -184,7 +195,6 @@ $(document).ready(function(){
 
 			container.dataset.parent = null;
 			container.style.display = "none";
-
 		}
 		
 	});
