@@ -99,12 +99,41 @@ function updateGraph() {
 	});
 }
 
-function updateNodes(data) {
+function addNode(data) {
 	nodes.push({data: data});
 }
 
-function updateEdges(source, target) {
+function removeNode(id) {
+	var connectedEdgesIndices = []
+	var connectedEdgesCount = 0;
+	edges.forEach(function (edge, index, array) {
+		if (edge.data.source == id || edge.data.target == id) {
+			connectedEdgesIndices.push(index);
+			connectedEdgesCount++;
+		}
+	});
+
+	for (let i = 0; i < connectedEdgesCount; i++){
+		edges.splice(connectedEdgesIndices[i]-i, 1);
+	}
+
+	nodes.forEach(function (node, index, array) {
+		if (node.data.id == id) {
+			array.splice(index, 1);
+		}
+	});
+}
+
+function addEdge(source, target) {
 	edges.push({data: {source: source, target: target}});
+}
+
+function removeEdge(source, target) {
+	edges.forEach(function (edge, index, array) {
+		if (edge.data.source == source && edge.data.target == target) {
+			array.splice(index, 1);
+		}
+	});
 }
 
 function saveGraph(filename){
@@ -136,7 +165,7 @@ $(document).ready(function(){
 	loadGraph(file);
 
 	if (nodes.length == 0){
-		updateNodes({id: "start"});
+		addNode({id: "start"});
 		updateGraph();
 	}
 
@@ -149,7 +178,7 @@ $(document).ready(function(){
 		}
 	});
 
-	$("#right-click-menu button").click(function() {
+	$("#right-click-menu .add-node").click(function() {
 		var container = document.getElementById("add-node-container");
 		container.style.display = "block";
 
@@ -157,6 +186,14 @@ $(document).ready(function(){
 
 		$("#right-click-menu").hide();
 
+	});
+
+
+	$("#right-click-menu .delete-node").click(function() {
+		removeNode(selectedNode);
+		updateGraph();
+
+		$("#right-click-menu").hide();
 	});
 
 	$("#add-node-attr").click(function () {
@@ -189,8 +226,8 @@ $(document).ready(function(){
 			let container = document.getElementById("add-node-container");
 			let source = container.dataset.parent
 
-			updateNodes(data);
-			updateEdges(source, id);
+			addNode(data);
+			addEdge(source, id);
 			updateGraph();
 
 			container.dataset.parent = null;

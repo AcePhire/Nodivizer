@@ -213,7 +213,7 @@
 
 }
 
-#right-click-menu button{
+#right-click-menu button {
 	position: relative;
 
 	width: 100%;
@@ -230,10 +230,15 @@
 	border-radius: 6px;
 	border-color: #585858;
 
-
 	cursor: pointer;
 }
 
-#right-click-menu button:hover{
+#right-click-menu button:not(:last-child) {
+	border-bottom: 1px solid #373737;
+	border-bottom-left-radius: 0px;
+	border-bottom-right-radius: 0px;
+}
+
+#right-click-menu button:hover {
 	background-color: #2e2e2e;
 }
