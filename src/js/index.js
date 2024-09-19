@@ -1,6 +1,6 @@
 let nodes = [] //{data: {id: ""}}
 let edges = [] //{data: {source: "", target: ""}}
-let selectedNode = null;
+let selectedId = null;
 
 var cy = cytoscape();
 
@@ -58,7 +58,7 @@ function updateGraph() {
 	cy.on("cxttap", "node", function (evt) {
                 var node = evt.target;
 		
-		selectedNode = node.id();
+		selectedId = node.id();
 		
 		var container = document.getElementById("add-node-container");
 		container.style.display = "none";
@@ -71,7 +71,42 @@ function updateGraph() {
 		rightClickMenu.style.display = "block";
 		rightClickMenu.style.top = `${y}px`;
 		rightClickMenu.style.left = `${x}px`;
-        })
+
+		for (const option of rightClickMenu.children) {
+			if (option.className.includes("node")) {
+				option.style.display = "block";
+			} else {
+				option.style.display = "none";
+			}
+		}
+        });
+
+	//show right click menu for edge
+	cy.on("cxttap", "edge", function (evt) {
+		var edge = evt.target;
+
+		selectedId = edge.id();
+
+		var container = document.getElementById("add-node-container");
+		container.style.display = "none";
+
+		var rightClickMenu = document.getElementById("right-click-menu");
+
+		x = evt.renderedPosition.x;
+		y = evt.renderedPosition.y;
+
+		rightClickMenu.style.display = "block";
+		rightClickMenu.style.top = `${y}px`;
+		rightClickMenu.style.left = `${x}px`;
+
+		for (const option of rightClickMenu.children) {
+			if (option.className.includes("edge")) {
+				option.style.display = "block";
+			} else {
+				option.style.display = "none";
+			}
+		}
+	});
 
 	//close container and right click menu if click away
 	cy.on("mousedown", function (evt) {
@@ -133,8 +168,17 @@ function addEdge(source, target) {
 	edges.push({data: {source: source, target: target}});
 }
 
-//remove an edge
-function removeEdge(source, target) {
+//remove an edge by id
+function removeEdgeById(id) {
+	edges.forEach(function (edge, index, array) {
+		if (edge.data.id == id) {
+			array.splice(index, 1);
+		}
+	});
+}
+
+//remove an edge by the source and target nodes
+function removeEdgeByConnected(source, target) {
 	edges.forEach(function (edge, index, array) {
 		if (edge.data.source == source && edge.data.target == target) {
 			array.splice(index, 1);
@@ -188,7 +232,7 @@ $(document).ready(function(){
 		var container = document.getElementById("add-node-container");
 		container.style.display = "block";
 
-		container.dataset.parent = selectedNode;
+		container.dataset.parent = selectedId;
 
 		$("#right-click-menu").hide();
 
@@ -196,7 +240,14 @@ $(document).ready(function(){
 
 
 	$("#right-click-menu .delete-node").click(function() {
-		removeNode(selectedNode);
+		removeNode(selectedId);
+		updateGraph();
+
+		$("#right-click-menu").hide();
+	});
+
+	$("#right-click-menu .delete-edge").click(function() {
+		removeEdgeById(selectedId);
 		updateGraph();
 
 		$("#right-click-menu").hide();
