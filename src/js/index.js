@@ -73,6 +73,7 @@ function updateGraph() {
 		rightClickMenu.style.left = `${x}px`;
         })
 
+	//close container and right click menu if click away
 	cy.on("mousedown", function (evt) {
 		var container = document.getElementById("add-node-container");
 		container.style.display = "none";
@@ -90,6 +91,7 @@ function updateGraph() {
 		cy.elements(`edge[source='${activeNode}'], edge[target='${activeNode}']`).style("line-color", "#8a5cf5");
 	});
 
+	//return color back
 	cy.on("free mouseout", "node", function (evt) {
 		var node = evt.target;
 		var activeNode = node.id();
@@ -99,24 +101,26 @@ function updateGraph() {
 	});
 }
 
+//add a node
 function addNode(data) {
 	nodes.push({data: data});
 }
 
+//remove a node
 function removeNode(id) {
-	var connectedEdgesIndices = []
+	//go through the connected edges and remove them
 	var connectedEdgesCount = 0;
-	edges.forEach(function (edge, index, array) {
+	for (let i = 0; i < edges.length; i++) {
+		let edge = edges[i];
+		//if the edge's source or target is the node, then remove it
 		if (edge.data.source == id || edge.data.target == id) {
-			connectedEdgesIndices.push(index);
-			connectedEdgesCount++;
+			edges.splice(i-connectedEdgesCount, 1);
+			//go back one to accomodate for the removal of a node
+			i--;
 		}
-	});
-
-	for (let i = 0; i < connectedEdgesCount; i++){
-		edges.splice(connectedEdgesIndices[i]-i, 1);
 	}
 
+	//find the node and remove it
 	nodes.forEach(function (node, index, array) {
 		if (node.data.id == id) {
 			array.splice(index, 1);
@@ -124,10 +128,12 @@ function removeNode(id) {
 	});
 }
 
+//add an edge
 function addEdge(source, target) {
 	edges.push({data: {source: source, target: target}});
 }
 
+//remove an edge
 function removeEdge(source, target) {
 	edges.forEach(function (edge, index, array) {
 		if (edge.data.source == source && edge.data.target == target) {
