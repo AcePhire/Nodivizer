@@ -48,7 +48,7 @@ function updateGraph() {
 		var container = document.getElementById("add-node-container");
 		container.style.display = "none";
 
-		var rightClickMenu = document.getElementById("right-click-menu");
+		var rightClickMenu = document.getElementById("node-right-click-menu");
 
 		x = evt.renderedPosition.x;
 		y = evt.renderedPosition.y;
@@ -56,14 +56,6 @@ function updateGraph() {
 		rightClickMenu.style.display = "block";
 		rightClickMenu.style.top = `${y}px`;
 		rightClickMenu.style.left = `${x}px`;
-
-		for (const option of rightClickMenu.children) {
-			if (option.className.includes("node")) {
-				option.style.display = "block";
-			} else {
-				option.style.display = "none";
-			}
-		}
         });
 
 	//show right click menu for edge
@@ -75,7 +67,7 @@ function updateGraph() {
 		var container = document.getElementById("add-node-container");
 		container.style.display = "none";
 
-		var rightClickMenu = document.getElementById("right-click-menu");
+		var rightClickMenu = document.getElementById("edge-right-click-menu");
 
 		x = evt.renderedPosition.x;
 		y = evt.renderedPosition.y;
@@ -83,14 +75,6 @@ function updateGraph() {
 		rightClickMenu.style.display = "block";
 		rightClickMenu.style.top = `${y}px`;
 		rightClickMenu.style.left = `${x}px`;
-
-		for (const option of rightClickMenu.children) {
-			if (option.className.includes("edge")) {
-				option.style.display = "block";
-			} else {
-				option.style.display = "none";
-			}
-		}
 	});
 
 	//close container and right click menu if click away
@@ -98,8 +82,11 @@ function updateGraph() {
 		var container = document.getElementById("add-node-container");
 		container.style.display = "none";
 
-		var rightClickMenu = document.getElementById("right-click-menu");
-		rightClickMenu.style.display = "none";
+		var nodeRightClickMenu = document.getElementById("node-right-click-menu");
+		nodeRightClickMenu.style.display = "none";
+		
+		var edgeRightClickMenu = document.getElementById("edge-right-click-menu");
+		edgeRightClickMenu.style.display = "none";
 	});
 
 	//change color of node and connceted edges on hover/grab
@@ -213,29 +200,29 @@ $(document).ready(function(){
 		}
 	});
 
-	$("#right-click-menu .add-node").click(function() {
+	$("#node-right-click-menu .add-node").click(function() {
 		var container = document.getElementById("add-node-container");
 		container.style.display = "block";
 
 		container.dataset.parent = selectedId;
 
-		$("#right-click-menu").hide();
+		$("#node-right-click-menu").hide();
 
 	});
 
 
-	$("#right-click-menu .delete-node").click(function() {
+	$("#node-right-click-menu .delete-node").click(function() {
 		removeNode(selectedId);
 		updateGraph();
 
-		$("#right-click-menu").hide();
+		$("#node-right-click-menu").hide();
 	});
 
-	$("#right-click-menu .delete-edge").click(function() {
+	$("#edge-right-click-menu .delete-edge").click(function() {
 		removeEdgeById(selectedId);
 		updateGraph();
 
-		$("#right-click-menu").hide();
+		$("#edge-right-click-menu").hide();
 	});
 
 	$("#add-node-attr").click(function () {
