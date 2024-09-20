@@ -39,7 +39,7 @@ function updateGraph() {
 		}
 	});
 
-	//show right click menu
+	//show right click menu for node
 	cy.on("cxttap", "node", function (evt) {
                 var node = evt.target;
 		
@@ -79,8 +79,11 @@ function updateGraph() {
 
 	//close container and right click menu if click away
 	cy.on("mousedown", function (evt) {
-		var container = document.getElementById("add-node-container");
-		container.style.display = "none";
+		var addContainer = document.getElementById("add-node-container");
+		addContainer.style.display = "none";
+
+		var updateContainer = document.getElementById("update-node-container");
+		updateContainer.style.display = "none";
 
 		var nodeRightClickMenu = document.getElementById("node-right-click-menu");
 		nodeRightClickMenu.style.display = "none";
@@ -111,6 +114,15 @@ function updateGraph() {
 //add a node
 function addNode(data) {
 	nodes.push({data: data});
+}
+
+//update a node
+function updateNode(data, id) {
+	nodes.forEach(function (node) {
+		if (node.data.id == id) {
+			node.data = data;
+		}
+	});
 }
 
 //remove a node
@@ -202,14 +214,47 @@ $(document).ready(function(){
 
 	$("#node-right-click-menu .add-node").click(function() {
 		var container = document.getElementById("add-node-container");
-		container.style.display = "block";
+		container.style.display = "flex";
+
+		container.dataset.parent = selectedId;
+
+		$("#node-right-click-menu").hide();
+	});
+
+	$("#node-right-click-menu .update-node").click(function() {
+		var container = document.getElementById("update-node-container");
+		container.style.display = "flex";
 
 		container.dataset.parent = selectedId;
 
 		$("#node-right-click-menu").hide();
 
-	});
+		var selectedNode;
 
+		nodes.forEach(function(node) {
+			if (node.data.id == selectedId) {
+				selectedNode = node;
+				return;
+			}
+		});
+
+
+		for (var attr in selectedNode.data) {
+			if (attr == "id") return;
+			else if (attr == "name") {
+				$("#update-node-container .top-container .inputs-container .node-label").val(selectedNode.data[attr]);
+			} else{
+				$("#update-node-container .top-container .inputs-container").append(`
+					<div class="node-attr">
+						<input class="attr-key" type="text" placeholder="Key" value=${attr}>
+						
+						<input class="attr-val" type="text" placeholder="Value" value=${selectedNode.data[attr]}>
+					</div>
+				`);
+			}
+		}
+
+	});
 
 	$("#node-right-click-menu .delete-node").click(function() {
 		removeNode(selectedId);
@@ -238,7 +283,7 @@ $(document).ready(function(){
 	$("#add-node").click(function () {
 		data = {};
 
-		let name = $("#add-node-container .top-container .inputs-container .node-id").val();
+		let name = $("#add-node-container .top-container .inputs-container .node-label").val();
 		if (name != null && name != ""){
 			data["name"] = name;
 		
@@ -262,6 +307,35 @@ $(document).ready(function(){
 				addEdge(source, target);
 				updateGraph();
 			}, 10);
+
+			container.dataset.parent = null;
+			container.style.display = "none";
+		}
+		
+	});
+
+	$("#update-node").click(function () {
+		data = {};
+
+		let name = $("#update-node-container .top-container .inputs-container .node-label").val();
+		if (name != null && name != ""){
+			data["id"] = selectedId;
+			data["name"] = name;
+
+			$("#update-node-container .top-container .inputs-container .node-attr").each(function () {
+				let key = $(this).find(".attr-key").val();
+				let value = $(this).find(".attr-val").val();
+			
+				if (key != null && key != "" && value != null && value != ""){
+					data[key] = value;
+				}
+			});
+			
+			let container = document.getElementById("update-node-container");
+			let source = container.dataset.parent
+
+			updateNode(data, selectedId);
+			updateGraph();
 
 			container.dataset.parent = null;
 			container.style.display = "none";

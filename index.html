@@ -13,10 +13,10 @@
 
 	<body>
 		<div id="cy"></div>
-		<div id="add-node-container" style="display: none;">
+		<div id="add-node-container" class="node-info-container" style="display: none;">
 			<div class="top-container">
 				<div class="inputs-container">
-					<input class="node-id" type="text" placeholder="Node ID">
+					<input class="node-label" type="text" placeholder="label">
 				</div>
 				<button id="add-node-attr">+</button>
 			</div>
@@ -25,13 +25,26 @@
 			</div>
 		</div>
 
+		<div id="update-node-container" class="node-info-container" style="display: none;">
+			<div class="top-container">
+				<div class="inputs-container">
+					<input class="node-label" type="text" placeholder="label">
+				</div>
+			</div>
+			<div class="bottom-container">
+				<button id="update-node">Update</button>
+			</div>
+		</div>
+
+
 		<div id="node-right-click-menu" style="display: none;">
 			<button class="add-node">Add Node</button>
-			<button class="delete-node">Delete Node</button>
+			<button class="update-node">Update Node</button>
+			<button class="delete-node">Delete</button>
 		</div>
 		
 		<div id="edge-right-click-menu" style="display: none;">
-			<button class="delete-edge">Delete Edge</button>
+			<button class="delete-edge">Delete</button>
 		</div>
 
 
