@@ -19,23 +19,8 @@ function updateGraph() {
 				style: {
 					'background-color': '#b3b3b3',
 					'color': '#b3b3b3',
-					'label': 'data(id)',
+					'label': 'data(name)',
 					'active-bg-color': '#8a5cf5'
-				}
-			},
-			{
-				selector: 'node[id="+"]',
-				style: {
-					'text-valign': 'center',
-					'text-halign': 'center',
-					'text-margin-y': '1.5px',
-
-					'width': '10px',
-					'height': '10px',
-
-					'color': '#373737',
-					'background-color': '#b3b3b3',
-					'background-opacity': '0.8'
 				}
 			},
 			{
@@ -215,7 +200,7 @@ $(document).ready(function(){
 	loadGraph(file);
 
 	if (nodes.length == 0){
-		addNode({id: "start"});
+		addNode({name: "start"});
 		updateGraph();
 	}
 
@@ -266,9 +251,9 @@ $(document).ready(function(){
 	$("#add-node").click(function () {
 		data = {};
 
-		let id = $("#add-node-container .top-container .inputs-container .node-id").val();
-		if (id != null && id != ""){
-			data["id"] = id;
+		let name = $("#add-node-container .top-container .inputs-container .node-id").val();
+		if (name != null && name != ""){
+			data["name"] = name;
 		
 
 			$("#add-node-container .top-container .inputs-container .node-attr").each(function () {
@@ -284,8 +269,12 @@ $(document).ready(function(){
 			let source = container.dataset.parent
 
 			addNode(data);
-			addEdge(source, id);
 			updateGraph();
+			setTimeout(() => {
+				let target = nodes[nodes.length-1].data.id;
+				addEdge(source, target);
+				updateGraph();
+			}, 10);
 
 			container.dataset.parent = null;
 			container.style.display = "none";
