@@ -1,6 +1,7 @@
 let nodes = [] //{data: {id: ""}}
 let edges = [] //{data: {source: "", target: ""}}
 let selectedId = null;
+let connectMode = false;
 
 var cy = cytoscape();
 
@@ -42,11 +43,14 @@ function updateGraph() {
 	//show right click menu for node
 	cy.on("cxttap", "node", function (evt) {
                 var node = evt.target;
-		
+			
 		selectedId = node.id();
 		
 		var container = document.getElementById("add-node-container");
 		container.style.display = "none";
+
+		var updateContainer = document.getElementById("update-node-container");
+		updateContainer.style.display = "none";
 
 		var rightClickMenu = document.getElementById("node-right-click-menu");
 
@@ -58,6 +62,18 @@ function updateGraph() {
 		rightClickMenu.style.left = `${x}px`;
         });
 
+	//select node to connect to
+	cy.on("mousedown", "node", function (evt) {
+		if (connectMode) {
+			var node = evt.target;
+		
+			addEdge(selectedId, node.id());
+			updateGraph();
+
+			connectMode = false;
+		}
+	});
+
 	//show right click menu for edge
 	cy.on("cxttap", "edge", function (evt) {
 		var edge = evt.target;
@@ -66,6 +82,9 @@ function updateGraph() {
 
 		var container = document.getElementById("add-node-container");
 		container.style.display = "none";
+
+		var updateContainer = document.getElementById("update-node-container");
+		updateContainer.style.display = "none";
 
 		var rightClickMenu = document.getElementById("edge-right-click-menu");
 
@@ -77,8 +96,10 @@ function updateGraph() {
 		rightClickMenu.style.left = `${x}px`;
 	});
 
-	//close container and right click menu if click away
+	//close container and right click menu if click away and reset cursor
 	cy.on("mousedown", function (evt) {
+		evt.cy.container().style.cursor = 'default';
+
 		var addContainer = document.getElementById("add-node-container");
 		addContainer.style.display = "none";
 
@@ -94,19 +115,31 @@ function updateGraph() {
 
 	//change color of node and connceted edges on hover/grab
 	cy.on("grab mouseover", "node", function (evt) {
+		evt.cy.container().style.cursor = 'pointer';
+
 		var node = evt.target;
 		var activeNode = node.id();
 	
 		node.style("background-color", "#8a5cf5");
-		cy.elements(`edge[source='${activeNode}'], edge[target='${activeNode}']`).style("line-color", "#8a5cf5");
+
+		if (!connectMode) {
+			cy.elements(`edge[source='${activeNode}'], edge[target='${activeNode}']`).style("line-color", "#8a5cf5");
+		}
 	});
 
 	//return color back
 	cy.on("free mouseout", "node", function (evt) {
+		evt.cy.container().style.cursor = 'default';
+
 		var node = evt.target;
 		var activeNode = node.id();
 		
-		node.style("background-color", "#b3b3b3");
+		if (!connectMode) {
+			node.style("background-color", "#b3b3b3");
+		}else {
+			node.style("background-color", "red");
+		}
+			
 		cy.elements(`edge[source='${activeNode}'], edge[target='${activeNode}']`).style("line-color", "#373737");
 	});
 }
@@ -254,6 +287,16 @@ $(document).ready(function(){
 			}
 		}
 
+	});
+
+	$("#node-right-click-menu .add-edge").click(function() {
+		if (!connectMode) connectMode = true;
+
+		cy.elements(`node[id = '${selectedId}']`).style("background-color", "red");
+		cy.elements(`node[id != '${selectedId}']`).style("background-color", "red");
+		cy.elements(`edge`).style("line-color", "#373737");
+		
+		$("#node-right-click-menu").hide();
 	});
 
 	$("#node-right-click-menu .delete-node").click(function() {
