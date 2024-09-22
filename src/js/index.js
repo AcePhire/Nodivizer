@@ -40,6 +40,22 @@ function updateGraph() {
 		}
 	});
 
+	//show right click menu for clicking on the background (empty)
+	cy.on("cxttap", function (evt) {
+		var rightClickMenus = document.getElementsByClassName("right-click-menu");
+		for (rightClickMenu of rightClickMenus) rightClickMenu.style.display = "none";
+
+		var emptyRightClickMenu = document.getElementById("empty-right-click-menu");
+
+		x = evt.renderedPosition.x;
+		y = evt.renderedPosition.y;
+
+		emptyRightClickMenu.style.display = "block";
+		emptyRightClickMenu.style.top = `${y}px`;
+		emptyRightClickMenu.style.left = `${x}px`;
+
+	});
+
 	//show right click menu for node
 	cy.on("cxttap", "node", function (evt) {
                 var node = evt.target;
@@ -52,27 +68,18 @@ function updateGraph() {
 		var updateContainer = document.getElementById("update-node-container");
 		updateContainer.style.display = "none";
 
-		var rightClickMenu = document.getElementById("node-right-click-menu");
+		var rightClickMenus = document.getElementsByClassName("right-click-menu");
+		for (rightClickMenu of rightClickMenus) rightClickMenu.style.display = "none";
+
+		var nodeRightClickMenu = document.getElementById("node-right-click-menu");
 
 		x = evt.renderedPosition.x;
 		y = evt.renderedPosition.y;
 
-		rightClickMenu.style.display = "block";
-		rightClickMenu.style.top = `${y}px`;
-		rightClickMenu.style.left = `${x}px`;
+		nodeRightClickMenu.style.display = "block";
+		nodeRightClickMenu.style.top = `${y}px`;
+		nodeRightClickMenu.style.left = `${x}px`;
         });
-
-	//select node to connect to
-	cy.on("mousedown", "node", function (evt) {
-		if (connectMode) {
-			var node = evt.target;
-		
-			addEdge(selectedId, node.id());
-			updateGraph();
-
-			connectMode = false;
-		}
-	});
 
 	//show right click menu for edge
 	cy.on("cxttap", "edge", function (evt) {
@@ -86,14 +93,17 @@ function updateGraph() {
 		var updateContainer = document.getElementById("update-node-container");
 		updateContainer.style.display = "none";
 
-		var rightClickMenu = document.getElementById("edge-right-click-menu");
+		var rightClickMenus = document.getElementsByClassName("right-click-menu");
+		for (rightClickMenu of rightClickMenus) rightClickMenu.style.display = "none";
+
+		var edgeRightClickMenu = document.getElementById("edge-right-click-menu");
 
 		x = evt.renderedPosition.x;
 		y = evt.renderedPosition.y;
 
-		rightClickMenu.style.display = "block";
-		rightClickMenu.style.top = `${y}px`;
-		rightClickMenu.style.left = `${x}px`;
+		edgeRightClickMenu.style.display = "block";
+		edgeRightClickMenu.style.top = `${y}px`;
+		edgeRightClickMenu.style.left = `${x}px`;
 	});
 
 	//close container and right click menu if click away and reset cursor
@@ -106,11 +116,20 @@ function updateGraph() {
 		var updateContainer = document.getElementById("update-node-container");
 		updateContainer.style.display = "none";
 
-		var nodeRightClickMenu = document.getElementById("node-right-click-menu");
-		nodeRightClickMenu.style.display = "none";
+		var rightClickMenus = document.getElementsByClassName("right-click-menu");
+		for (rightClickMenu of rightClickMenus) rightClickMenu.style.display = "none";
+	});
+
+	//select node to connect to
+	cy.on("mousedown", "node", function (evt) {
+		if (connectMode) {
+			var node = evt.target;
 		
-		var edgeRightClickMenu = document.getElementById("edge-right-click-menu");
-		edgeRightClickMenu.style.display = "none";
+			addEdge(selectedId, node.id());
+			updateGraph();
+
+			connectMode = false;
+		}
 	});
 
 	//change color of node and connceted edges on hover/grab
@@ -245,6 +264,15 @@ $(document).ready(function(){
 		}
 	});
 
+	$("#empty-right-click-menu .add-node").click(function() {
+		var container = document.getElementById("add-node-container");
+		container.style.display = "flex";
+
+		container.dataset.parent = "";
+
+		$("#empty-right-click-menu").hide();
+	});
+
 	$("#node-right-click-menu .add-node").click(function() {
 		var container = document.getElementById("add-node-container");
 		container.style.display = "flex";
@@ -340,21 +368,24 @@ $(document).ready(function(){
 				}
 			});
 			
+			addNode(data);
+			updateGraph();
+
 			let container = document.getElementById("add-node-container");
 			let source = container.dataset.parent
 
-			addNode(data);
-			updateGraph();
-			setTimeout(() => {
-				let target = nodes[nodes.length-1].data.id;
-				addEdge(source, target);
-				updateGraph();
-			}, 10);
+			if (source) {
 
-			container.dataset.parent = null;
-			container.style.display = "none";
+				setTimeout(() => {
+					let target = nodes[nodes.length-1].data.id;
+					addEdge(source, target);
+					updateGraph();
+				}, 10);
+
+				container.dataset.parent = null;
+				container.style.display = "none";
+			}
 		}
-		
 	});
 
 	$("#update-node").click(function () {
