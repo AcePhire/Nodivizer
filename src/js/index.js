@@ -2,6 +2,7 @@ let nodes = [] //{data: {id: ""}}
 let edges = [] //{data: {source: "", target: ""}}
 let selectedId = null;
 let connectMode = false;
+let viewAttrs = false;
 
 var cy = cytoscape();
 
@@ -10,15 +11,23 @@ function closeContainers() {
 	var addContainer = document.getElementById("add-node-container");
 	addContainer.style.display = "none";
 
-	var addAttr = addContainer.getElementsByClassName("node-attr");
-	while (addAttr[0]) addAttr[0].parentNode.removeChild(addAttr[0]);
+	var addAttrs = addContainer.getElementsByClassName("node-attr");
+	while (addAttrs[0]) addAttrs[0].parentNode.removeChild(addAttrs[0]);
 
 	//close update container
 	var updateContainer = document.getElementById("update-node-container");
 	updateContainer.style.display = "none";
 	
-	var updateAttr = updateContainer.getElementsByClassName("node-attr");
-	while (updateAttr[0]) updateAttr[0].parentNode.removeChild(updateAttr[0]);
+	var updateAttrs = updateContainer.getElementsByClassName("node-attr");
+	while (updateAttrs[0]) updateAttrs[0].parentNode.removeChild(updateAttrs[0]);
+	
+	//close view container
+	viewAttrs = false;
+	var viewContainer = document.getElementById("view-attrs-container");
+	viewContainer.style.display = "none";
+	
+	var viewAttrs = viewContainer.getElementsByClassName("attr");
+	while (viewAttrs[0]) viewAttrs[0].parentNode.removeChild(viewAttrs[0]);
 }
 
 function updateGraph() {
@@ -128,6 +137,18 @@ function updateGraph() {
 
 	//select node to connect to
 	cy.on("mousedown", "node", function (evt) {
+		if (viewAttrs) {
+			closeContainers();
+
+	                var node = evt.target;
+			selectedId = node.id();
+
+			var nodeRightClickMenu = document.getElementById("node-right-click-menu")
+			var viewAttrsBtn = nodeRightClickMenu.getElementsByClassName("view-attrs")[0];
+
+			viewAttrsBtn.click();
+		}
+
 		if (connectMode) {
 			var node = evt.target;
 		
@@ -322,6 +343,39 @@ $(document).ready(function(){
 			}
 		}
 
+	});
+
+	$("#node-right-click-menu .view-attrs").click(function() {
+		if (!viewAttrs) viewAttrs = true;
+
+		var container = document.getElementById("view-attrs-container");
+		container.style.display = "flex";
+
+		container.dataset.parent = selectedId;
+
+		$("#node-right-click-menu").hide();
+
+		var selectedNode;
+
+		nodes.forEach(function(node) {
+			if (node.data.id == selectedId) {
+				selectedNode = node;
+				return;
+			}
+		});
+
+
+		for (var attr in selectedNode.data) {
+			if (attr != "id"){
+				if (attr == "name") {
+					$("#view-attrs-container .top-container .inputs-container .node-label").val(selectedNode.data[attr]);
+				}else {
+					$("#view-attrs-container .top-container .inputs-container").append(`
+						<input class="attr" type="text" value="${attr}: ${selectedNode.data[attr]}" readonly>
+					`);
+				}
+			}
+		}
 	});
 
 	$("#node-right-click-menu .add-edge").click(function() {

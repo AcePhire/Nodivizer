@@ -106,6 +106,13 @@
 	margin-top: 20px;
 }
 
+#view-attrs-container .top-container .inputs-container input {
+	background-color: #252525;
+
+	text-align: center;
+	font-weight: 400;
+}
+
 .node-info-container .top-container button {
 	position: relative;
 
