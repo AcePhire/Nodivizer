@@ -5,6 +5,22 @@ let connectMode = false;
 
 var cy = cytoscape();
 
+function closeContainers() {
+	//close add container
+	var addContainer = document.getElementById("add-node-container");
+	addContainer.style.display = "none";
+
+	var addAttr = addContainer.getElementsByClassName("node-attr");
+	while (addAttr[0]) addAttr[0].parentNode.removeChild(addAttr[0]);
+
+	//close update container
+	var updateContainer = document.getElementById("update-node-container");
+	updateContainer.style.display = "none";
+	
+	var updateAttr = updateContainer.getElementsByClassName("node-attr");
+	while (updateAttr[0]) updateAttr[0].parentNode.removeChild(updateAttr[0]);
+}
+
 function updateGraph() {
 	cy = cytoscape({
 		container: document.getElementById('cy'),
@@ -42,6 +58,8 @@ function updateGraph() {
 
 	//show right click menu for clicking on the background (empty)
 	cy.on("cxttap", function (evt) {
+		closeContainers();
+
 		var rightClickMenus = document.getElementsByClassName("right-click-menu");
 		for (rightClickMenu of rightClickMenus) rightClickMenu.style.display = "none";
 
@@ -58,15 +76,11 @@ function updateGraph() {
 
 	//show right click menu for node
 	cy.on("cxttap", "node", function (evt) {
+		closeContainers();
+
                 var node = evt.target;
 			
 		selectedId = node.id();
-		
-		var container = document.getElementById("add-node-container");
-		container.style.display = "none";
-
-		var updateContainer = document.getElementById("update-node-container");
-		updateContainer.style.display = "none";
 
 		var rightClickMenus = document.getElementsByClassName("right-click-menu");
 		for (rightClickMenu of rightClickMenus) rightClickMenu.style.display = "none";
@@ -83,15 +97,11 @@ function updateGraph() {
 
 	//show right click menu for edge
 	cy.on("cxttap", "edge", function (evt) {
+		closeContainers();
+
 		var edge = evt.target;
 
 		selectedId = edge.id();
-
-		var container = document.getElementById("add-node-container");
-		container.style.display = "none";
-
-		var updateContainer = document.getElementById("update-node-container");
-		updateContainer.style.display = "none";
 
 		var rightClickMenus = document.getElementsByClassName("right-click-menu");
 		for (rightClickMenu of rightClickMenus) rightClickMenu.style.display = "none";
@@ -108,13 +118,9 @@ function updateGraph() {
 
 	//close container and right click menu if click away and reset cursor
 	cy.on("mousedown", function (evt) {
+		closeContainers();
+
 		evt.cy.container().style.cursor = 'default';
-
-		var addContainer = document.getElementById("add-node-container");
-		addContainer.style.display = "none";
-
-		var updateContainer = document.getElementById("update-node-container");
-		updateContainer.style.display = "none";
 
 		var rightClickMenus = document.getElementsByClassName("right-click-menu");
 		for (rightClickMenu of rightClickMenus) rightClickMenu.style.display = "none";
@@ -301,17 +307,18 @@ $(document).ready(function(){
 
 
 		for (var attr in selectedNode.data) {
-			if (attr == "id") return;
-			else if (attr == "name") {
-				$("#update-node-container .top-container .inputs-container .node-label").val(selectedNode.data[attr]);
-			} else{
-				$("#update-node-container .top-container .inputs-container").append(`
-					<div class="node-attr">
-						<input class="attr-key" type="text" placeholder="Key" value=${attr}>
-						
-						<input class="attr-val" type="text" placeholder="Value" value=${selectedNode.data[attr]}>
-					</div>
-				`);
+			if (attr != "id"){
+				if (attr == "name") {
+					$("#update-node-container .top-container .inputs-container .node-label").val(selectedNode.data[attr]);
+				}else {
+					$("#update-node-container .top-container .inputs-container").append(`
+						<div class="node-attr">
+							<input class="attr-key" type="text" placeholder="Key" value=${attr}>
+							
+							<input class="attr-val" type="text" placeholder="Value" value=${selectedNode.data[attr]}>
+						</div>
+					`);
+				}
 			}
 		}
 
@@ -341,8 +348,18 @@ $(document).ready(function(){
 		$("#edge-right-click-menu").hide();
 	});
 
-	$("#add-node-attr").click(function () {
+	$("#add-node-container .top-container .add-node-attr").click(function () {
 		$("#add-node-container .top-container .inputs-container").append(`
+			<div class="node-attr">
+				<input class="attr-key" type="text" placeholder="Key">
+				
+				<input class="attr-val" type="text" placeholder="Value">
+			</div>
+		`);
+	});
+
+	$("#update-node-container .top-container .add-node-attr").click(function () {
+		$("#update-node-container .top-container .inputs-container").append(`
 			<div class="node-attr">
 				<input class="attr-key" type="text" placeholder="Key">
 				
@@ -414,6 +431,8 @@ $(document).ready(function(){
 			container.dataset.parent = null;
 			container.style.display = "none";
 		}
+
+		$("#update-node-container .top-container .inputs-container .node-attr").remove();
 		
 	});
 });
