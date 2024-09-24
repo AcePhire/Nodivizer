@@ -299,6 +299,19 @@ $(document).ready(function(){
 
 		$("#empty-right-click-menu").hide();
 	});
+	
+	$("#empty-right-click-menu .reload").click(function() {
+		location.reload();
+		
+		$("#empty-right-click-menu").hide();
+	});
+
+	$("#empty-right-click-menu .save").click(function() {
+		saveGraph(file);
+		alert("saved");
+		
+		$("#empty-right-click-menu").hide();
+	});
 
 	$("#node-right-click-menu .add-node").click(function() {
 		var container = document.getElementById("add-node-container");
