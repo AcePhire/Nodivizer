@@ -20,6 +20,13 @@ function closeContainers() {
 	
 	var updateAttrs = updateContainer.getElementsByClassName("node-attr");
 	while (updateAttrs[0]) updateAttrs[0].parentNode.removeChild(updateAttrs[0]);
+
+	//close color container
+	var colorContainer = document.getElementById("color-node-container");
+	colorContainer.style.display = "none";
+
+	var colorAttrs = colorContainer.getElementsByClassName("node-attr");
+	while (colorAttrs[0]) colorAttrs[0].parentNode.removeChild(colorAttrs[0]);
 	
 	//close view container
 	viewAttrs = false;
@@ -43,10 +50,12 @@ function updateGraph() {
 			{
 				selector: 'node',
 				style: {
-					'background-color': '#b3b3b3',
+					'background-color': 'data(color)',
 					'color': '#b3b3b3',
 					'label': 'data(name)',
-					'active-bg-color': '#8a5cf5'
+					'active-bg-color': '#8a5cf5',
+					'text-max-width': '160ch', 
+					'text-wrap': 'ellipsis'
 				}
 			},
 			{
@@ -181,7 +190,7 @@ function updateGraph() {
 		var activeNode = node.id();
 		
 		if (!connectMode) {
-			node.style("background-color", "#b3b3b3");
+			node.style("background-color", node.data().color);
 		}else {
 			node.style("background-color", "red");
 		}
@@ -192,6 +201,7 @@ function updateGraph() {
 
 //add a node
 function addNode(data) {
+	if (!data["color"]) data["color"] = "#b3b3b3"
 	nodes.push({data: data});
 }
 
@@ -199,7 +209,17 @@ function addNode(data) {
 function updateNode(data, id) {
 	nodes.forEach(function (node) {
 		if (node.data.id == id) {
+			data["color"] = node.data.color;
 			node.data = data;
+		}
+	});
+}
+
+function updateNodeColor(color, id) {
+	nodes.forEach(function (node, index, array) {
+		console.log(id);
+		if (node.data.id == id) {
+			nodes[index].data.color = color;
 		}
 	});
 }
@@ -341,7 +361,7 @@ $(document).ready(function(){
 
 
 		for (var attr in selectedNode.data) {
-			if (attr != "id"){
+			if (attr != "id" && attr != "color"){
 				if (attr == "name") {
 					$("#update-node-container .top-container .inputs-container .node-label").val(selectedNode.data[attr]);
 				}else {
@@ -353,6 +373,40 @@ $(document).ready(function(){
 						</div>
 					`);
 				}
+			}
+		}
+
+	});
+
+	$("#node-right-click-menu .color-node").click(function() {
+		var container = document.getElementById("color-node-container");
+		container.style.display = "flex";
+
+		container.dataset.parent = selectedId;
+
+		$("#node-right-click-menu").hide();
+
+		var selectedNode;
+
+		nodes.forEach(function(node) {
+			if (node.data.id == selectedId) {
+				selectedNode = node;
+				return;
+			}
+		});
+
+
+		for (var attr in selectedNode.data) {
+			if (attr == "name") {
+				$("#color-node-container .top-container .inputs-container .node-label").val(selectedNode.data[attr]);
+			} else if (attr == "color") {
+				$("#color-node-container .top-container .inputs-container").append(`
+					<div class="node-attr">
+						<input class="attr-key" type="text" placeholder="Key" value=${attr}>
+						
+						<input class="attr-val" type="text" placeholder="Value" value=${selectedNode.data[attr]}>
+					</div>
+				`);
 			}
 		}
 
@@ -379,7 +433,7 @@ $(document).ready(function(){
 
 
 		for (var attr in selectedNode.data) {
-			if (attr != "id"){
+			if (attr != "id" && attr != "color") {
 				if (attr == "name") {
 					$("#view-attrs-container .top-container .inputs-container .node-label").val(selectedNode.data[attr]);
 				}else {
@@ -455,20 +509,15 @@ $(document).ready(function(){
 			addNode(data);
 			updateGraph();
 
+			setTimeout(() => {
+				let target = nodes[nodes.length-1].data.id;
+				addEdge(selectedId, target);
+				updateGraph();
+			}, 10);
+
 			let container = document.getElementById("add-node-container");
-			let source = container.dataset.parent
-
-			if (source) {
-
-				setTimeout(() => {
-					let target = nodes[nodes.length-1].data.id;
-					addEdge(source, target);
-					updateGraph();
-				}, 10);
-
-				container.dataset.parent = null;
-				container.style.display = "none";
-			}
+			container.dataset.parent = null;
+			container.style.display = "none";
 		}
 	});
 
@@ -489,17 +538,31 @@ $(document).ready(function(){
 				}
 			});
 			
-			let container = document.getElementById("update-node-container");
-			let source = container.dataset.parent
-
 			updateNode(data, selectedId);
 			updateGraph();
 
+			let container = document.getElementById("update-node-container");
 			container.dataset.parent = null;
 			container.style.display = "none";
 		}
-
-		$("#update-node-container .top-container .inputs-container .node-attr").remove();
-		
 	});
+
+	$("#color-node").click(function () {
+		$("#color-node-container .top-container .inputs-container .node-attr").each(function () {
+			let key = $(this).find(".attr-key").val();
+			let value = $(this).find(".attr-val").val();
+			if (key != null && key != "" && value != null && value != ""){
+				if (key == "color") {
+					updateNodeColor(value, selectedId);
+					updateGraph();
+					return;
+				}
+			}
+		});
+			
+		let container = document.getElementById("color-node-container");
+		container.dataset.parent = null;
+		container.style.display = "none";	
+	});
+
 });
