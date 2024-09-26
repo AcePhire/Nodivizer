@@ -3,6 +3,7 @@ let edges = [] //{data: {source: "", target: ""}}
 let selectedId = null;
 let connectMode = false;
 let viewAttrs = false;
+let filtered = false;
 
 var cy = cytoscape();
 
@@ -175,8 +176,10 @@ function updateGraph() {
 		var node = evt.target;
 		var activeNode = node.id();
 	
-		node.style("background-color", "#8a5cf5");
-
+		if (!filtered) {
+			node.style("background-color", "#8a5cf5");
+		}
+		
 		if (!connectMode) {
 			cy.elements(`edge[source='${activeNode}'], edge[target='${activeNode}']`).style("line-color", "#8a5cf5");
 		}
@@ -188,14 +191,32 @@ function updateGraph() {
 
 		var node = evt.target;
 		var activeNode = node.id();
-		
-		if (!connectMode) {
-			node.style("background-color", node.data().color);
-		}else {
-			node.style("background-color", "red");
+
+		if (!filtered) {
+			if (!connectMode) {
+				node.style("background-color", node.data().color);
+			}else {
+				node.style("background-color", "red");
+			}
 		}
 			
 		cy.elements(`edge[source='${activeNode}'], edge[target='${activeNode}']`).style("line-color", "#373737");
+	});
+}
+
+function filter(key, value) {
+	filtered = true;
+
+	nodes.forEach(function (node) {
+		if (node.data[key] == value) cy.elements(`node[id='${node.data.id}']`).style("background-color", "#8a5cf5");
+	});
+}
+
+function unfilter() {
+	filtered = false;
+
+	nodes.forEach(function (node) {
+		cy.elements(`node[id='${node.data.id}']`).style("background-color", node.data.color);
 	});
 }
 
