@@ -337,7 +337,20 @@ $(document).ready(function(){
 		var container = document.getElementById("add-node-container");
 		container.style.display = "flex";
 
-		container.dataset.parent = "";
+		$("#empty-right-click-menu").hide();
+	});
+
+	$("#empty-right-click-menu .filter").click(function() {
+		var container = document.getElementById("filter-container");
+		container.style.display = "flex";
+		
+		$("#empty-right-click-menu").hide();
+	});
+
+	$("#empty-right-click-menu .unfilter").click(function () {
+		unfilter();
+		$("#empty-right-click-menu .filter").show();
+		$(this).hide();
 
 		$("#empty-right-click-menu").hide();
 	});
@@ -580,11 +593,11 @@ $(document).ready(function(){
 		}
 	});
 
-	$("#color-node").click(function () {
+	$("#color-node").click(function() {
 		$("#color-node-container .top-container .inputs-container .node-attr").each(function () {
 			let key = $(this).find(".attr-key").val();
 			let value = $(this).find(".attr-val").val();
-			if (key != null && key != "" && value != null && value != ""){
+			if (key != null && key != "" && value != null && value != "") {
 				if (key == "color") {
 					updateNodeColor(value, selectedId);
 					updateGraph();
@@ -598,4 +611,18 @@ $(document).ready(function(){
 		container.style.display = "none";	
 	});
 
+	$("#filter-node").click(function () {
+		$("#filter-container .top-container .inputs-container .node-attr").each(function () {
+			let key = $(this).find(".attr-key").val();
+			let value = $(this).find(".attr-val").val();
+			if (key != null && key != "" && value != null && value != "") {
+				filter(key, value);
+				$("#empty-right-click-menu .filter").hide();
+				$("#empty-right-click-menu .unfilter").show();
+			}
+		});
+
+		let container = document.getElementById("filter-container");
+		container.style.display = "none";
+	});
 });
