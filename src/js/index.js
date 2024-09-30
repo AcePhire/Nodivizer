@@ -85,7 +85,7 @@ function updateGraph() {
 		var emptyRightClickMenu = document.getElementById("empty-right-click-menu");
 
 		x = evt.renderedPosition.x;
-		y = evt.renderedPosition.y;
+		y = evt.renderedPosition.y
 
 		emptyRightClickMenu.style.display = "block";
 		emptyRightClickMenu.style.top = `${y}px`;
@@ -154,8 +154,9 @@ function updateGraph() {
 			selectedId = node.id();
 
 			var nodeRightClickMenu = document.getElementById("node-right-click-menu")
-			var viewAttrsBtn = nodeRightClickMenu.getElementsByClassName("view-attrs")[0];
+			var viewAttrsBtn = nodeRightClickMenu.getElementsByClassName("toggle-attrs")[0];
 
+			viewAttrs = false;
 			viewAttrsBtn.click();
 		}
 
@@ -433,36 +434,47 @@ $(document).ready(function(){
 
 	});
 
-	$("#node-right-click-menu .view-attrs").click(function() {
-		if (!viewAttrs) viewAttrs = true;
+	$("#node-right-click-menu .toggle-attrs").click(function() {
+		if (!viewAttrs){
+			viewAttrs = true;
+			$(this).html("Hide Attributes");
 
-		var container = document.getElementById("view-attrs-container");
-		container.style.display = "flex";
+			var container = document.getElementById("view-attrs-container");
+			container.style.display = "flex";
 
-		container.dataset.parent = selectedId;
+			container.dataset.parent = selectedId;
 
-		$("#node-right-click-menu").hide();
+			$("#node-right-click-menu").hide();
 
-		var selectedNode;
+			var selectedNode;
 
-		nodes.forEach(function(node) {
-			if (node.data.id == selectedId) {
-				selectedNode = node;
-				return;
-			}
-		});
+			nodes.forEach(function(node) {
+				if (node.data.id == selectedId) {
+					selectedNode = node;
+					return;
+				}
+			});
 
 
-		for (var attr in selectedNode.data) {
-			if (attr != "id" && attr != "color") {
-				if (attr == "name") {
-					$("#view-attrs-container .top-container .inputs-container .node-label").val(selectedNode.data[attr]);
-				}else {
-					$("#view-attrs-container .top-container .inputs-container").append(`
-						<input class="attr" type="text" value="${attr}: ${selectedNode.data[attr]}" readonly>
-					`);
+			for (var attr in selectedNode.data) {
+				if (attr != "id" && attr != "color") {
+					if (attr == "name") {
+						$("#view-attrs-container .top-container .inputs-container .node-label").val(selectedNode.data[attr]);
+					}else {
+						$("#view-attrs-container .top-container .inputs-container").append(`
+							<input class="attr" type="text" value="${attr}: ${selectedNode.data[attr]}" readonly>
+						`);
+					}
 				}
 			}
+		}else {
+			viewAttrs = false;
+			
+			$(this).html("Show Attributes");
+			
+			$("#node-right-click-menu").hide();
+
+			closeContainers();
 		}
 	});
 
