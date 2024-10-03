@@ -4,6 +4,7 @@ let selectedId = null;
 let connectMode = false;
 let viewAttrs = false;
 let filtered = false;
+let mouseClickPos;
 
 var cy = cytoscape();
 
@@ -72,7 +73,9 @@ function updateGraph() {
 		layout: {
 			name: 'cola',
 			infinite: true
-		}
+		},
+
+		panningEnabled: false
 	});
 
 	//show right click menu for clicking on the background (empty)
@@ -86,6 +89,8 @@ function updateGraph() {
 
 		x = evt.renderedPosition.x;
 		y = evt.renderedPosition.y
+
+		mouseClickPos = {x: x, y: y};
 
 		emptyRightClickMenu.style.display = "block";
 		emptyRightClickMenu.style.top = `${y}px`;
@@ -225,6 +230,8 @@ function unfilter() {
 function addNode(data) {
 	if (!data["color"]) data["color"] = "#b3b3b3"
 	nodes.push({data: data});
+
+	cy.add({ group: "nodes", data: data, position: mouseClickPos });
 }
 
 //update a node
@@ -239,7 +246,6 @@ function updateNode(data, id) {
 
 function updateNodeColor(color, id) {
 	nodes.forEach(function (node, index, array) {
-		console.log(id);
 		if (node.data.id == id) {
 			nodes[index].data.color = color;
 		}
@@ -270,7 +276,8 @@ function removeNode(id) {
 
 //add an edge
 function addEdge(source, target) {
-	edges.push({data: {source: source, target: target}});
+	data = {source: source, target: target};
+	edges.push({data: data});
 }
 
 //remove an edge by id
@@ -337,6 +344,8 @@ $(document).ready(function(){
 		var container = document.getElementById("add-node-container");
 		container.style.display = "flex";
 
+		selectedId = null;
+
 		$("#empty-right-click-menu").hide();
 	});
 
@@ -372,16 +381,12 @@ $(document).ready(function(){
 		var container = document.getElementById("add-node-container");
 		container.style.display = "flex";
 
-		container.dataset.parent = selectedId;
-
 		$("#node-right-click-menu").hide();
 	});
 
 	$("#node-right-click-menu .update-node").click(function() {
 		var container = document.getElementById("update-node-container");
 		container.style.display = "flex";
-
-		container.dataset.parent = selectedId;
 
 		$("#node-right-click-menu").hide();
 
@@ -416,8 +421,6 @@ $(document).ready(function(){
 	$("#node-right-click-menu .color-node").click(function() {
 		var container = document.getElementById("color-node-container");
 		container.style.display = "flex";
-
-		container.dataset.parent = selectedId;
 
 		$("#node-right-click-menu").hide();
 
@@ -455,8 +458,6 @@ $(document).ready(function(){
 			var container = document.getElementById("view-attrs-container");
 			container.style.display = "flex";
 
-			container.dataset.parent = selectedId;
-
 			$("#node-right-click-menu").hide();
 
 			var selectedNode;
@@ -464,7 +465,7 @@ $(document).ready(function(){
 			nodes.forEach(function(node) {
 				if (node.data.id == selectedId) {
 					selectedNode = node;
-					return;
+					position: 		return;
 				}
 			});
 
@@ -553,16 +554,16 @@ $(document).ready(function(){
 			});
 			
 			addNode(data);
-			updateGraph();
 
-			setTimeout(() => {
-				let target = nodes[nodes.length-1].data.id;
-				addEdge(selectedId, target);
-				updateGraph();
-			}, 10);
+			if (selectedId) {
+				setTimeout(() => {
+					let target = nodes[nodes.length-1].data.id;
+					addEdge(selectedId, target);
+					updateGraph();
+				}, 10);
+			}
 
 			let container = document.getElementById("add-node-container");
-			container.dataset.parent = null;
 			container.style.display = "none";
 		}
 	});
@@ -588,7 +589,6 @@ $(document).ready(function(){
 			updateGraph();
 
 			let container = document.getElementById("update-node-container");
-			container.dataset.parent = null;
 			container.style.display = "none";
 		}
 	});
@@ -607,7 +607,6 @@ $(document).ready(function(){
 		});
 			
 		let container = document.getElementById("color-node-container");
-		container.dataset.parent = null;
 		container.style.display = "none";	
 	});
 
