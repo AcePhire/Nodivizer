@@ -29,7 +29,7 @@ function closeContainers() {
 
 	var colorAttrs = colorContainer.getElementsByClassName("node-attr");
 	while (colorAttrs[0]) colorAttrs[0].parentNode.removeChild(colorAttrs[0]);
-	
+
 	//close view container
 	viewAttrs = false;
 	var viewContainer = document.getElementById("view-attrs-container");
@@ -37,6 +37,10 @@ function closeContainers() {
 	
 	var viewAttrs = viewContainer.getElementsByClassName("attr");
 	while (viewAttrs[0]) viewAttrs[0].parentNode.removeChild(viewAttrs[0]);
+	
+	//close filter container
+	var filterContainer = document.getElementById("filter-container");
+	filterContainer.style.display = "none";
 }
 
 function updateGraph() {
@@ -624,4 +628,6 @@ $(document).ready(function(){
 		let container = document.getElementById("filter-container");
 		container.style.display = "none";
 	});
+
+	$(".node-info-container button.close").click(closeContainers);
 });
